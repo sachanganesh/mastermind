@@ -2,9 +2,13 @@ import java.util.Scanner;
 
 object Mastermind {
 	val input = new Scanner(System.in)
+
 	val colorChoices = Array('R', 'G', 'B', 'O', 'P', 'Y')
 	val computerCode = new Array[Char](4)
+
 	var turn = 0
+	var gameOver = false
+	var win = false
 
 	def main(args: Array[String]): Unit = {
 		writeInstructions
@@ -78,6 +82,10 @@ object Mastermind {
 	*/
 	def run(): Unit = {
 		chooseCode
+		while (gameOver == false) {
+			println("Turn #" + turn)
+			println("-------------")
+		}
 	}
 
 	/**
