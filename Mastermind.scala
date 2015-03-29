@@ -82,6 +82,12 @@ object Mastermind {
 		chooseCode
 	}
 
+
+	/**
+	*	chooseCode
+	*
+	*	Selects the computer's pins and alerts the player when completed.
+	*/
 	def chooseCode(): Unit = {
 		for (i <- 0 to 3)
 			computerCode(i) = colorChoices((math.random * colorChoices.length).asInstanceOf[Int])
