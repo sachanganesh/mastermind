@@ -84,7 +84,9 @@ object Mastermind {
 		chooseCode
 		while (gameOver == false) {
 			println("Turn #" + turn)
-			println("-------------")
+			println("-------------\n")
+			promptGuess
+			println("\n\n")
 		}
 	}
 
@@ -94,8 +96,50 @@ object Mastermind {
 	*	Selects the computer's pins and alerts the player when completed.
 	*/
 	def chooseCode(): Unit = {
-		for (i <- 0 to 3)
+		for (i <- 0 until computerCode.length)
 			computerCode(i) = colorChoices((math.random * colorChoices.length).asInstanceOf[Int])
 		println("Computer has selected its pins.\n")
 	}
+
+	/**
+	*	promptGuess
+	*
+	*	Prompts user to input their guess of the computer's code.
+	*
+	*	return: (Array[Char]) player's valid guess
+	*/
+	def promptGuess(): Array[Char] = {
+		var guess = ""
+		do {
+			print("Enter a valid guess (e.g. `ROPY` or `G O B G`)\t> ")
+			guess = input.nextLine
+		} while (!guessIsValid(guess))
+		turn += 1
+		return stripGuess(guess)
+	}
+
+	/**
+	*	guessIsValid
+	*
+	*	Determines whether a given guess is of 4 valid pins.
+	*
+	*	param: (String) player's guess
+	*	return: (Boolean) whether player's guess is valid
+	*/
+	def guessIsValid(guess: String = null): Boolean = {
+		if (guess == null) return false
+		val trimmedGuess: Array[Char] = stripGuess(guess)
+		if (trimmedGuess.length != 4) return false
+		return true
+	}
+
+	/**
+	*	stripGuess
+	*
+	*	Collects all valid pins in a guess.
+	*
+	*	param: (String) player's guess
+	*	return: (Array[Char]) all valid pins player's guess
+	*/
+	def stripGuess(guess: String = null): Array[Char] = guess.toUpperCase.toCharArray.filter(colorChoices.contains(_))
 }
