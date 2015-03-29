@@ -2,11 +2,17 @@ import java.util.Scanner;
 
 object Mastermind {
 	val input = new Scanner(System.in)
+	val colorChoices = Array('R', 'G', 'B', 'O', 'P', 'Y')
+	val computerCode = new Array[Char](4)
 
 	def main(args: Array[String]): Unit = {
 		writeInstructions
 		println
 		promptGameStart
+		println("------------")
+		println("GAME START")
+		println("------------")
+		println
 		run
 	}
 
@@ -73,6 +79,12 @@ object Mastermind {
 	*	Main game loop that handles all game operations and logic.
 	*/
 	def run(): Unit = {
+		chooseCode
+	}
 
+	def chooseCode(): Unit = {
+		for (i <- 0 to 3)
+			computerCode(i) = colorChoices((math.random * colorChoices.length).asInstanceOf[Int])
+		println("Computer has selected its pins.\n")
 	}
 }
