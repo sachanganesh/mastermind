@@ -1,8 +1,12 @@
-import java.util.Scanner;
+import java.util.Scanner
+import scala.collection.mutable.ArrayBuffer
 
 object Mastermind {
 	val input = new Scanner(System.in)
+	val maxTurns = 10
 
+	val guesses = Array.ofDim[Char](8, 4)
+	val markers = Array.ofDim[Char](8, 4)
 	val colorChoices = Array('R', 'G', 'B', 'O', 'P', 'Y')
 	val computerCode = new Array[Char](4)
 
@@ -45,9 +49,9 @@ object Mastermind {
 		println
 		println("The computer will choose a permutation of four colored pins.")
 		println
-		println("You will have 8 turns to find the computer's code.")
+		println("You will have " + maxTurns + " turns to find the computer's code.")
 		println("Every turn, you will choose a permutation of four pins to match against the computer's choice.")
-		println("You win if you can guess the code in 8 turns or less!")
+		println("You win if you can guess the code in " + maxTurns + " turns or less!")
 		println
 		println("In order to help you out, you will have four hint markers.")
 		println("After every turn, you will be given the four markers, which help indicate if your choices are correct.")
@@ -82,11 +86,42 @@ object Mastermind {
 	*/
 	def run(): Unit = {
 		chooseCode
-		while (gameOver == false) {
+		while (win == false || turn >= maxTurns) {
+			turn += 1
 			println("Turn #" + turn)
 			println("-------------\n")
-			promptGuess
+			var guess = promptGuess
+			for (i <- 0 until guesses(turn - 1).length)
+				guesses(turn - 1)(i) = guess(i)
+			var markersForGuess = checkGuess
+			for (i <- 0 until markers(turn - 1).length)
+				markers(turn - 1)(i) = markersForGuess(i)
+			println
+			printBoard
 			println("\n\n")
+		}
+		if (win)
+			println("Congratulations! You won!")
+		else
+			println("You lost. Better luck next time!")
+		println("\n\n")
+	}
+
+	/**
+	*	printBoard
+	*
+	*	Displays the game board after player has guessed.
+	*/
+	def printBoard(): Unit = {
+		println("\nBoard:\n")
+		for (i <- turn - 1 to 0 by -1) {
+			var display = ""
+			for (pin <- guesses(i))
+				display += pin
+			display += ",\t\t"
+			for (marker <- markers(i))
+				display += marker
+			println(display)
 		}
 	}
 
@@ -111,10 +146,10 @@ object Mastermind {
 	def promptGuess(): Array[Char] = {
 		var guess = ""
 		do {
-			print("Enter a valid guess (e.g. `ROPY` or `G O B G`)\t> ")
+			println("Select from: [`R`, `G`, `B`, `O`, `P`, `Y`]")
+			print("Enter a valid guess (e.g. `ROPY`)\t> ")
 			guess = input.nextLine
 		} while (!guessIsValid(guess))
-		turn += 1
 		return stripGuess(guess)
 	}
 
@@ -142,4 +177,72 @@ object Mastermind {
 	*	return: (Array[Char]) all valid pins player's guess
 	*/
 	def stripGuess(guess: String = null): Array[Char] = guess.toUpperCase.toCharArray.filter(colorChoices.contains(_))
+
+	/**
+	*	checkGuess
+	*
+	*	Derives markers associated with a player's guess and determines win or loss per guess.
+	*
+	*	return: (Array[Char]) markers associated with a guess
+	*/
+	def checkGuess(): Array[Char] = {
+		if (guesses(turn - 1).deep == computerCode.deep) {
+			win = true
+		}
+		return determineMarkers
+	}
+
+	/**
+	*	determineMarkers
+	*
+	*	Determines markers associated with a player's guess.
+	*
+	*	return: (Array[Char]) markers associated with a guess
+	*/
+	def determineMarkers(): Array[Char] = {
+		val markers = new ArrayBuffer[Char]
+		for (i <- 0 until guesses(turn - 1).length)
+			markers += determineMarker(i)
+		return markersSort(markers)
+	}
+
+	/**
+	*	determineMarker
+	*
+	*	Determines the appropriate marker for a pin in a player's guess.
+	*
+	*	param: (Int) index of considered pin
+	*	return: (Char) marker for a pin
+	*/
+	def determineMarker(i: Int): Char = {
+		println(computerCode.mkString(", "))
+		println("!!!! - " + guesses(turn - 1)(i))
+		if (guesses(turn - 1)(i) == computerCode(i)) 
+			return 'X'
+		for (k <- 0 until computerCode.length)
+			if (guesses(turn - 1)(i) == computerCode(k))
+				return 'W'
+		return 'E'
+	}
+
+	/**
+	*	markersSort
+	*
+	*	Sorts the markers determined by accuracy.
+	*
+	*	param: (ArrayBuffer[Char]) unranked set of markers
+	*	return: (Array[Char]) markers ranked from most accurate to least
+	*/
+	def markersSort(markers: ArrayBuffer[Char]): Array[Char] = {
+		val buffer = new ArrayBuffer[Char]
+		for (i <- 0 until markers.length) {
+			if (markers(i) == 'X')
+				buffer.insert(0, 'X')
+			else if (markers(i) == 'W')
+				buffer.insert(buffer.lastIndexOf('X') + 1, 'W')
+			else
+				buffer += 'E'
+		}
+		return buffer.toArray
+	}
 }
