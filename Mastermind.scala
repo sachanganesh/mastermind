@@ -4,6 +4,7 @@ object Mastermind {
 	val input = new Scanner(System.in)
 	val colorChoices = Array('R', 'G', 'B', 'O', 'P', 'Y')
 	val computerCode = new Array[Char](4)
+	var turn = 0
 
 	def main(args: Array[String]): Unit = {
 		writeInstructions
@@ -63,10 +64,7 @@ object Mastermind {
 	def promptGameStart(): Unit = {
 		var response: String = ""
 		do {
-			println("What would you like to do?")
-			println("Enter `y` to start the game.")
-			println("Enter `n` or `q` to quit the game.")
-			print("Start the game?\t> ")
+			print("Start the game? (`n` to quit, `y` to continue)\t> ")
 			response = input.nextLine
 			println("\n\n")
 		} while (!response.equals("") && !(response.equals("y") || response.equals("n") || response.equals("q")))
@@ -81,7 +79,6 @@ object Mastermind {
 	def run(): Unit = {
 		chooseCode
 	}
-
 
 	/**
 	*	chooseCode
