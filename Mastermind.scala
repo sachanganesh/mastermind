@@ -2,16 +2,26 @@ import java.util.Scanner
 import scala.collection.mutable.ArrayBuffer
 
 object Mastermind {
+	// Input manager
 	val input = new Scanner(System.in)
+	// Max # of guesses a player can make
 	val maxTurns = 10
 
-	val guesses = Array.ofDim[Char](8, 4)
-	val markers = Array.ofDim[Char](8, 4)
+	// All player guesses
+	val guesses = Array.ofDim[Char](maxTurns, 4)
+	// All markers for player guesses
+	val markers = Array.ofDim[Char](maxTurns, 4)
+
+	// Pin choices
 	val colorChoices = Array('R', 'G', 'B', 'O', 'P', 'Y')
+	// Computer pins selection
 	val computerCode = new Array[Char](4)
 
+	// Turn #
 	var turn = 0
+	// Tracks game end state
 	var gameOver = false
+	// Tracks win state
 	var win = false
 
 	def main(args: Array[String]): Unit = {
@@ -59,7 +69,7 @@ object Mastermind {
 		println("The black marker is represented by `X`. It means you have the correct pin, in the correct position.")
 		println("The empty marker is represented by `E`. It means you have an incorrect pin.")
 		println
-		println("OBJECTIVE: Guess the permutation that the computer chose in 8 turns or less.")
+		println("OBJECTIVE: Guess the permutation that the computer chose in " + maxTurns + " turns or less.")
 		println("------------")
 		println
 	}
@@ -85,26 +95,43 @@ object Mastermind {
 	*	Main game loop that handles all game operations and logic.
 	*/
 	def run(): Unit = {
-		chooseCode
-		while (win == false || turn >= maxTurns) {
-			turn += 1
-			println("Turn #" + turn)
+		computerTurn(true)
+		while (gameOver == false && turn < maxTurns) {
+			println("Turn #" + (turn + 1))
 			println("-------------\n")
-			var guess = promptGuess
-			for (i <- 0 until guesses(turn - 1).length)
-				guesses(turn - 1)(i) = guess(i)
-			var markersForGuess = checkGuess
-			for (i <- 0 until markers(turn - 1).length)
-				markers(turn - 1)(i) = markersForGuess(i)
+			playerTurn
+			computerTurn()
 			println
 			printBoard
+			turn += 1
 			println("\n\n")
 		}
-		if (win)
+		if (win) {
 			println("Congratulations! You won!")
-		else
+		} else {
 			println("You lost. Better luck next time!")
+			println("The computer's code was " + computerCode.mkString)
+		}
 		println("\n\n")
+	}
+
+	def computerTurn(isFirstTurn: Boolean = false): Unit = {
+		if (isFirstTurn) {
+			selectComputerPins
+			return
+		}
+
+		// Determine hint markers for latest guess
+		var markersFromGuess = checkGuess
+		markers(turn) = markersFromGuess
+	}
+
+	def playerTurn(): Unit = {
+		// Get pin guess
+		val guess: Array[Char] = promptGuess
+
+		// Store pin guess
+		guesses(turn) = guess
 	}
 
 	/**
@@ -114,7 +141,7 @@ object Mastermind {
 	*/
 	def printBoard(): Unit = {
 		println("\nBoard:\n")
-		for (i <- turn - 1 to 0 by -1) {
+		for (i <- turn to 0 by -1) {
 			var display = ""
 			for (pin <- guesses(i))
 				display += pin
@@ -126,11 +153,11 @@ object Mastermind {
 	}
 
 	/**
-	*	chooseCode
+	*	selectComputerPins
 	*
 	*	Selects the computer's pins and alerts the player when completed.
 	*/
-	def chooseCode(): Unit = {
+	def selectComputerPins(): Unit = {
 		for (i <- 0 until computerCode.length)
 			computerCode(i) = colorChoices((math.random * colorChoices.length).asInstanceOf[Int])
 		println("Computer has selected its pins.\n")
@@ -186,9 +213,7 @@ object Mastermind {
 	*	return: (Array[Char]) markers associated with a guess
 	*/
 	def checkGuess(): Array[Char] = {
-		if (guesses(turn - 1).deep == computerCode.deep) {
-			win = true
-		}
+		if (guesses(turn).deep == computerCode.deep) win = true
 		return determineMarkers
 	}
 
@@ -200,9 +225,21 @@ object Mastermind {
 	*	return: (Array[Char]) markers associated with a guess
 	*/
 	def determineMarkers(): Array[Char] = {
-		val markers = new ArrayBuffer[Char]
-		for (i <- 0 until guesses(turn - 1).length)
-			markers += determineMarker(i)
+		val markers = new Array[Char](guesses(turn).length)
+		val matches = new ArrayBuffer[Int]
+		for (i <- 0 until guesses(turn).length)
+			if (guesses(turn)(i) == computerCode(i)) {
+				markers(i) = 'X'
+				matches += i
+			}
+		for (i <- (0 until guesses(turn).length).filterNot(matches.contains(_))) {
+			for (k <- 0 until computerCode.length) {
+				if (guesses(turn)(i) == computerCode(k)) {
+					markers(i) = 'W'
+					matches += i
+				}
+			}
+		}
 		return markersSort(markers)
 	}
 
@@ -214,14 +251,13 @@ object Mastermind {
 	*	param: (Int) index of considered pin
 	*	return: (Char) marker for a pin
 	*/
-	def determineMarker(i: Int): Char = {
-		println(computerCode.mkString(", "))
-		println("!!!! - " + guesses(turn - 1)(i))
-		if (guesses(turn - 1)(i) == computerCode(i)) 
+	def determineMarker(i: Int, matched: Array[Int]): Char = {
+		if (guesses(turn)(i) == computerCode(i))
 			return 'X'
 		for (k <- 0 until computerCode.length)
-			if (guesses(turn - 1)(i) == computerCode(k))
+			if (guesses(turn)(i) == computerCode(k) && !matched.contains(k)) {
 				return 'W'
+			}
 		return 'E'
 	}
 
@@ -233,7 +269,7 @@ object Mastermind {
 	*	param: (ArrayBuffer[Char]) unranked set of markers
 	*	return: (Array[Char]) markers ranked from most accurate to least
 	*/
-	def markersSort(markers: ArrayBuffer[Char]): Array[Char] = {
+	def markersSort(markers: Array[Char]): Array[Char] = {
 		val buffer = new ArrayBuffer[Char]
 		for (i <- 0 until markers.length) {
 			if (markers(i) == 'X')
@@ -243,6 +279,11 @@ object Mastermind {
 			else
 				buffer += 'E'
 		}
+		if (buffer.length > guesses(turn).length)
+			buffer.trimEnd(buffer.length - guesses(turn).length)
+		else if (buffer.length < guesses(turn).length)
+			for (i <- 0 until (guesses(turn).length - buffer.length))
+				buffer += 'E'
 		return buffer.toArray
 	}
 }
