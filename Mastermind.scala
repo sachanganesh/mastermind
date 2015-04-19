@@ -257,8 +257,7 @@ object Mastermind {
 
 		for (i <- 0 until guesses(turn).length) {
 			for (k <- 0 until computerCode.length) {
-				if (!matched.contains(i)) {
-					if (guesses(turn)(i) == computerCode(k)) {
+				if (!matched.contains(i) && guesses(turn)(i) == computerCode(k)) {
 						hints += '-'
 						matched += i
 					}
