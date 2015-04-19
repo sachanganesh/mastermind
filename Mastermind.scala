@@ -65,9 +65,9 @@ object Mastermind {
 		println
 		println("In order to help you out, you will have four hint markers.")
 		println("After every turn, you will be given the four markers, which help indicate if your choices are correct.")
-		println("The white marker is represented by `W`. It means you have a correct pin, but it is in the wrong position.")
-		println("The black marker is represented by `X`. It means you have the correct pin, in the correct position.")
-		println("The empty marker is represented by `E`. It means you have an incorrect pin.")
+		println("The white marker is represented by `-`. It means you have a correct pin, but it is in the wrong position.")
+		println("The black marker is represented by `o`. It means you have the correct pin, in the correct position.")
+		println("The empty marker is represented by `x`. It means you have an incorrect pin.")
 		println
 		println("OBJECTIVE: Guess the permutation that the computer chose in " + maxTurns + " turns or less.")
 		println("------------")
@@ -122,16 +122,12 @@ object Mastermind {
 		}
 
 		// Determine hint markers for latest guess
-		var markersFromGuess = checkGuess
-		markers(turn) = markersFromGuess
+		markers(turn) = checkGuess
 	}
 
 	def playerTurn(): Unit = {
-		// Get pin guess
-		val guess: Array[Char] = promptGuess
-
-		// Store pin guess
-		guesses(turn) = guess
+		// Determine player guess
+		guesses(turn) = promptGuess
 	}
 
 	/**
@@ -161,6 +157,7 @@ object Mastermind {
 		for (i <- 0 until computerCode.length)
 			computerCode(i) = colorChoices((math.random * colorChoices.length).asInstanceOf[Int])
 		println("Computer has selected its pins.\n")
+		println(computerCode.mkString)
 	}
 
 	/**
@@ -198,12 +195,12 @@ object Mastermind {
 	/**
 	*	stripGuess
 	*
-	*	Collects all valid pins in a guess.
+	*	Collects all valid pins from a guess.
 	*
 	*	param: (String) player's guess
 	*	return: (Array[Char]) all valid pins player's guess
 	*/
-	def stripGuess(guess: String = null): Array[Char] = guess.toUpperCase.toCharArray.filter(colorChoices.contains(_))
+	def stripGuess(guess: String = null): Array[Char] = return guess.toUpperCase.toCharArray.filter(colorChoices.contains(_))
 
 	/**
 	*	checkGuess
@@ -213,7 +210,10 @@ object Mastermind {
 	*	return: (Array[Char]) markers associated with a guess
 	*/
 	def checkGuess(): Array[Char] = {
-		if (guesses(turn).deep == computerCode.deep) win = true
+		if (guesses(turn).deep == computerCode.deep) {
+			gameOver = true
+			win = true
+		}
 		return determineMarkers
 	}
 
