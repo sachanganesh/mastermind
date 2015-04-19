@@ -4,25 +4,31 @@ import scala.collection.mutable.ArrayBuffer
 object Mastermind {
 	// Input manager
 	val input = new Scanner(System.in)
+
 	// Max # of guesses a player can make
 	val maxTurns = 10
+
 	// # of pins and markers for a code
-	val numPins = 4
+	val numPinsPlayable = 4
 
 	// All player guesses
-	val guesses = Array.ofDim[Char](maxTurns, numPins)
+	val guesses = Array.ofDim[Char](maxTurns, numPinsPlayable)
+
 	// All markers for player guesses
-	val markers = Array.ofDim[Char](maxTurns, numPins)
+	val markers = Array.ofDim[Char](maxTurns, numPinsPlayable)
 
 	// Pin choices
 	val colorChoices = Array('B', 'G', 'O', 'P', 'R', 'Y')
+
 	// Computer pins selection
-	val computerCode = new Array[Char](numPins)
+	val computerCode = new Array[Char](numPinsPlayable)
 
 	// Turn #
 	var turn = 0
+
 	// Tracks game end state
 	var gameOver = false
+	
 	// Tracks win state
 	var win = false
 
@@ -59,14 +65,14 @@ object Mastermind {
 		println("The red pin is represented by `R`")
 		println("The yellow pin is represented by `Y`")
 		println
-		println("The computer will choose a permutation of " + numPins + " colored pins.")
+		println("The computer will choose a permutation of " + numPinsPlayable + " colored pins.")
 		println
 		println("You will have " + maxTurns + " turns to find the computer's code.")
-		println("Every turn, you will choose a permutation of " + numPins + " pins to match against the computer's choice.")
+		println("Every turn, you will choose a permutation of " + numPinsPlayable + " pins to match against the computer's choice.")
 		println("You win if you can guess the code in " + maxTurns + " turns or less!")
 		println
-		println("In order to help you out, you will have " + numPins + " hint markers.")
-		println("After every turn, you will be given the " + numPins + " markers, which help indicate if your choices are correct.")
+		println("In order to help you out, you will have " + numPinsPlayable + " hint markers.")
+		println("After every turn, you will be given the " + numPinsPlayable + " markers, which help indicate if your choices are correct.")
 		println("The white marker is represented by `-`. It means you have a correct pin, but it is in the wrong position.")
 		println("The black marker is represented by `o`. It means you have the correct pin, in the correct position.")
 		println("The empty marker is represented by `x`. It means you have an incorrect pin.")
@@ -121,6 +127,11 @@ object Mastermind {
 		println("\n\n")
 	}
 
+	/**
+	*	computerTurn
+	*
+	*	Processes the computer's turn; selects pins or provides hint markers.
+	*/
 	def computerTurn(isFirstTurn: Boolean = false): Unit = {
 		if (isFirstTurn) {
 			selectComputerPins
@@ -131,6 +142,11 @@ object Mastermind {
 		markers(turn) = checkGuess
 	}
 
+	/**
+	*	playerTurn
+	*
+	*	Processes the player's turn; prompts player for code guess and persists data.
+	*/
 	def playerTurn(): Unit = {
 		// Determine player guess
 		guesses(turn) = promptGuess
@@ -145,15 +161,7 @@ object Mastermind {
 		println("\nBoard:\n")
 
 		for (i <- turn to 0 by -1) {
-			var display = ""
-			for (pin <- guesses(i)) {
-				display += pin
-			}
-			display += ",\t\t"
-			for (marker <- markers(i)) {
-				display += marker
-			}
-			println(display)
+			println(guesses(i).mkString + ",\t\t" + markers(i).mkString)
 		}
 	}
 
@@ -168,7 +176,6 @@ object Mastermind {
 		}
 
 		println("Computer has selected its pins.\n")
-		println(computerCode.mkString)
 	}
 
 	/**
@@ -182,7 +189,7 @@ object Mastermind {
 		var guess = ""
 
 		do {
-			println("Select from: [`R`, `G`, `B`, `O`, `P`, `Y`]")
+			println("Select from: " + "[" + colorChoices.mkString(", ") + "]")
 			print("Enter a valid guess (e.g. `ROPY`)\t> ")
 			guess = input.nextLine
 		} while (!guessIsValid(guess))
@@ -204,7 +211,7 @@ object Mastermind {
 		}
 
 		val trimmedGuess: Array[Char] = stripGuess(guess)
-		if (trimmedGuess.length != numPins) {
+		if (trimmedGuess.length != numPinsPlayable) {
 			return false
 		}
 
@@ -260,12 +267,11 @@ object Mastermind {
 				if (!matched.contains(i) && guesses(turn)(i) == computerCode(k)) {
 						hints += '-'
 						matched += i
-					}
 				}
 			}
 		}
 
-		val remaining = numPins - hints.length
+		val remaining = numPinsPlayable - hints.length
 		for (i <- 0 until remaining) {
 			hints += 'x'
 		}
