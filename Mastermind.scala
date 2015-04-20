@@ -6,10 +6,10 @@ object Mastermind {
 	val input = new Scanner(System.in)
 
 	// Max # of guesses a player can make
-	val maxTurns = 10
+	var maxTurns = 10
 
 	// # of pins and markers for a code
-	val numPinsPlayable = 4
+	var numPinsPlayable = 4
 
 	// All player guesses
 	val guesses = Array.ofDim[Char](maxTurns, numPinsPlayable)
@@ -88,16 +88,36 @@ object Mastermind {
 	*	Prompts user to either start game or quit playing.
 	*/
 	def promptGameStart(): Unit = {
-		var response: String = ""
+		var response = ""
+		var desiredTurns = 0
+		var desiredPinsPlayable = 0
+
 		do {
 			print("Start the game? (`n` to quit, `y` to continue)\t> ")
 			response = input.nextLine
-			println("\n\n")
+			println("\n")
 		} while (!response.equals("") && !(response.equals("y") || response.equals("n") || response.equals("q")))
 
 		if (response.equals("n") || response.equals("q")) {
 			System.exit(1)
 		}
+
+		do {
+			print("Enter desired number of turns for this game (recommended: " + maxTurns + ")\t> ")
+			desiredTurns = input.nextInt
+			println("\n")
+		} while (desiredTurns == 0)
+
+		do {
+			print("Enter desired number of pins in a code (recommended: " + numPinsPlayable + ")\t> ")
+			desiredPinsPlayable = input.nextInt
+			println("\n")
+		} while (desiredPinsPlayable == 0)
+
+		maxTurns = desiredTurns
+		numPinsPlayable = desiredPinsPlayable
+
+		println("\n\n")
 	}
 
 	/**
