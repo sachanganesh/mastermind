@@ -268,20 +268,23 @@ object Mastermind {
 	*/
 	def configureHints(): Array[Char] = {
 		val hints = new ArrayBuffer[Char]
-		val matched = new ArrayBuffer[Int]
+		val guessMatched = new ArrayBuffer[Int]
+		val codeMatched = new ArrayBuffer[Int]
 
 		for (i <- 0 until guesses(turn).length) {
 			if (guesses(turn)(i) == computerCode(i)) {
 				hints += 'o'
-				matched += i
+				guessMatched += i
+				codeMatched += i
 			}
 		}
 
 		for (i <- 0 until guesses(turn).length) {
 			for (k <- 0 until computerCode.length) {
-				if (!matched.contains(i) && guesses(turn)(i) == computerCode(k)) {
+				if (!guessMatched.contains(i) && !codeMatched.contains(k) && guesses(turn)(i) == computerCode(k)) {
 						hints += '-'
-						matched += i
+						guessMatched += i
+						codeMatched += k
 				}
 			}
 		}
