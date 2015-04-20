@@ -28,7 +28,7 @@ object Mastermind {
 
 	// Tracks game end state
 	var gameOver = false
-	
+
 	// Tracks win state
 	var win = false
 
@@ -190,11 +190,11 @@ object Mastermind {
 
 		do {
 			println("Select from: " + "[" + colorChoices.mkString(", ") + "]")
-			print("Enter a valid guess (e.g. `ROPY`)\t> ")
-			guess = input.nextLine
+			print("Enter a valid guess (e.g. " + colorChoices.dropRight(colorChoices.length - numPinsPlayable).mkString + ")\t> ")
+			guess = stripGuess(input.nextLine)
 		} while (!guessIsValid(guess))
 
-		return stripGuess(guess)
+		return guess.toCharArray
 	}
 
 	/**
@@ -206,12 +206,7 @@ object Mastermind {
 	*	return: (Boolean) whether player's guess is valid
 	*/
 	def guessIsValid(guess: String = null): Boolean = {
-		if (guess == null) {
-			return false
-		}
-
-		val trimmedGuess: Array[Char] = stripGuess(guess)
-		if (trimmedGuess.length != numPinsPlayable) {
+		if (guess == null || guess.length != numPinsPlayable) {
 			return false
 		}
 
@@ -226,7 +221,7 @@ object Mastermind {
 	*	param: (String) player's guess
 	*	return: (Array[Char]) all valid pins player's guess
 	*/
-	def stripGuess(guess: String = null): Array[Char] = guess.toUpperCase.toCharArray.filter(colorChoices.contains(_))
+	def stripGuess(guess: String = null): String = guess.toUpperCase.toCharArray.filter(colorChoices.contains(_)).mkString
 
 	/**
 	*	checkGuess
