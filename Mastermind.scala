@@ -85,7 +85,7 @@ object Mastermind {
 	/**
 	*	promptGameStart
 	*
-	*	Prompts user to either start game or quit playing.
+	*	Prompts user to either start game or quit playing; allows user to specify game configurations.
 	*/
 	def promptGameStart(): Unit = {
 		var response = ""
