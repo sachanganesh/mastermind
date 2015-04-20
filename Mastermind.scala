@@ -127,6 +127,10 @@ object Mastermind {
 	*/
 	def run(): Unit = {
 		computerTurn(true)
+
+		// Clear Scanner buffer
+		input.nextLine
+
 		while (gameOver == false && turn < maxTurns) {
 			println("Turn #" + (turn + 1))
 			println("-------------\n")
@@ -142,8 +146,9 @@ object Mastermind {
 			println("Congratulations! You won!")
 		} else {
 			println("You lost. Better luck next time!")
-			println("The computer's code was " + computerCode.mkString)
 		}
+
+		println("The computer's code was " + computerCode.mkString + ".")
 		println("\n\n")
 	}
 
